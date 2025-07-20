@@ -1,10 +1,12 @@
 import prisma from "@/lib/db";
 import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-interface RedirectPageProps {
+type Props = {
   params: { shortcode: string };
-}
-export default async function RedirectPage({ params }: RedirectPageProps) {
+};
+
+export default async function RedirectPage({ params }: Props) {
   const { shortcode } = params;
 
   const url = await prisma.url.findUnique({
@@ -12,13 +14,11 @@ export default async function RedirectPage({ params }: RedirectPageProps) {
   });
 
   if (!url) {
-    return <div> 404 - URL not found </div>;
+    notFound(); // Uses Next.js 404 page
   }
 
   await prisma.url.update({
-    where: {
-      id: url.id,
-    },
+    where: { id: url.id },
     data: { visits: { increment: 1 } },
   });
 
